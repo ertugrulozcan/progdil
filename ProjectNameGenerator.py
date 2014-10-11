@@ -1,14 +1,16 @@
 '''
-Created on 11 Eki 2014
+Created on 12 Ekim 2014
 
 @author: Ahmet Ertugrul Ozcan
 '''
 
 # -*- coding: cp1254 -*-
 
+import json
 from _overlapped import NULL
 from pip._vendor.distlib.compat import raw_input
-from lib2to3.fixer_util import String
+import os
+import codecs
 
 words = {"TR" :
          {"names" :
@@ -21,9 +23,9 @@ words = {"TR" :
            "inci",
            "bisiklet",
            "bikini",
-           "agartici"
+           "agartici",
            "bluz",
-           "sueter"
+           "sueter",
            "kitap",
            "fare",
            "hoparlor",
@@ -35,7 +37,7 @@ words = {"TR" :
            "kart",
            "CD",
            "cekirdek",
-           "zincir"
+           "zincir",
            "tebesir",
            "depo",
            "cek",
@@ -43,13 +45,13 @@ words = {"TR" :
            "makine",
            "saat",
            "kahve makinesi",
-           "tarak"
+           "tarak",
            "kavanoz",
            "mantar",
            "pastel boya",
            "kredi karti",
            "minder",
-           "deodorant"
+           "deodorant",
            "deterjan", 
            "zar",
            "fatura",
@@ -65,7 +67,7 @@ words = {"TR" :
            "gozluk",
            "bilesen",
            "izgara",
-           "kagit"
+           "kagit",
            "aski",
            "sapka",
            "kask",
@@ -132,7 +134,7 @@ words = {"TR" :
             "termometre",
             "iplik",
             "lastik",
-            "kutu"
+            "kutu",
             "tütün",
             "diş macunu",
             "kürdan",
@@ -424,11 +426,15 @@ def Random(topRange):
 class ProjectNameGenerator(object):
     # Kurucu metod - Constructor
     def __init__(self, params):
+        #Daha once uretilmis girdilerin kayittan okunmasi
+        self.generated = self.ReadGeneratedDictionary()
+        
         while True:
             self.Program()
             
     def Program(self):
         print("PROJE ISIM URETECI >>>")
+        
         query = raw_input()
         command = str.upper(query.split(' ')[0])
         
@@ -436,23 +442,59 @@ class ProjectNameGenerator(object):
             language = str.upper(query.split(' ')[1])
             count = int(query.split(' ')[2])
             self.Generate(count, language)
-            input()
         elif command == "HELP":
             print("### YARDIM ###")
-            print("GENERATE KOMUTU: 1. Parametre; dil ayarı (TR:Türkçe ve EN:İngilizce), 2. Parametre; üretilmek istenen isim sayısı.")
-            input()
+            print("GENERATE KOMUTU: 1. Parametre; dil ayarı (TR:Türkçe ve EN:İngilizce), 2. Parametre; üretilmek istenen isim sayısı.\n")
+            print("HELP KOMUTU: Yardım menüsü\n")
+            print("EXIT KOMUTU: Çıkış\n")
         elif command == "EXIT":
+            self.SaveGeneratedDictionary()
             exit()
             
     def Generate(self, n=None, language="TR"):
         if n is None:
-            print(words[language]["adjectives"][Random(words[language]["adjectives"].__len__())] + " " + words[language]["names"][Random(words[language]["names"].__len__())])
+            random1 = Random(words[language]["adjectives"].__len__())
+            adjective = words[language]["adjectives"][random1]
+            random2 = Random(words[language]["names"].__len__())
+            name = words[language]["names"][random2]
+            return adjective + " " + name
+            
         else:
             i = 0
             while i < n:
-                self.Generate(None, language)
-                i+=1
-
+                projectName = self.Generate(None, language)
+                if self.IsGenerated(language, projectName):
+                    continue
+                else:
+                    self.generated[language].append(projectName)
+                    i+=1
+                    print('{}. {}'.format(i, projectName))
+    
+    def ReadGeneratedDictionary(self):
+        try:
+            path = os.getcwd() + "\generated.json"
+            jsondata = open(path).read()
+            data = json.loads(jsondata)
+            return data
+        except ValueError:
+            generated = {"TR":[], "EN":[]}
+            return generated
+    
+    def SaveGeneratedDictionary(self):
+        path = os.getcwd() + "\generated.json"
+        jsondata = json.dumps(self.generated, separators=(', ',' : '))
+        with codecs.open(path,'w', encoding='utf8') as f:
+            f.write(jsondata)
+    
+    def IsGenerated(self, language, name):
+        if len(self.generated[language]) > 0:
+            i = 0
+            while i < len(self.generated[language]):
+                if name == self.generated[language][i]:
+                    return True
+                i += 1
+            return False
+        else:
+            return False
+    
 generator = ProjectNameGenerator(NULL)
-
-
