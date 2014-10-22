@@ -463,16 +463,14 @@ class ProjectNameGenerator(object):
             i = 0
             while i < n:
                 projectName = self.Generate(None, language)
-                if self.IsGenerated(language, projectName):
-                    continue
-                else:
+                if !self.IsGenerated(language, projectName):
                     self.generated[language].append(projectName)
                     i+=1
                     print('{}. {}'.format(i, projectName))
     
     def ReadGeneratedDictionary(self):
         try:
-            path = os.getcwd() + "\generated.json"
+            path = os.getcwd() + os.pathsep + "generated.json"
             jsondata = open(path).read()
             data = json.loads(jsondata)
             return data
@@ -481,7 +479,7 @@ class ProjectNameGenerator(object):
             return generated
     
     def SaveGeneratedDictionary(self):
-        path = os.getcwd() + "\generated.json"
+        path = os.getcwd() + os.pathsep + "generated.json"
         jsondata = json.dumps(self.generated, separators=(', ',' : '))
         with codecs.open(path,'w', encoding='utf8') as f:
             f.write(jsondata)
